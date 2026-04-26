@@ -4,6 +4,7 @@
 #include "RE/Offset.h"
 #include "Settings.h"
 
+#include "SkillDecay_API.h"
 #include <xbyak/xbyak.h>
 
 namespace CustomSkills
@@ -35,6 +36,17 @@ namespace CustomSkills
 
 				if (skill->Level && skill->Level->type == RE::TESGlobal::Type::kShort) {
 					_requirementSkills.emplace(skill->Level, skill);
+
+					SkillDecay::RegisterCustomSkill(
+						id.c_str(),
+						group->ActorValues[i],
+						skill->Info,
+						skill->Level,
+						skill->Ratio,
+						true,
+						skill->Legendary,
+						nullptr,
+						0);
 				}
 			}
 		}
