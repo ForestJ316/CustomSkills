@@ -30,6 +30,8 @@ namespace CustomSkills
 
 		bool UpdateColor();
 
+		std::array<float, 4> QuerySkillProgress();
+
 		std::string ID;
 		std::string Description;
 		RE::TESGlobal* Level = nullptr;

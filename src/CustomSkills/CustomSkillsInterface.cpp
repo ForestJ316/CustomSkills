@@ -39,22 +39,10 @@ namespace CustomSkills::Impl
 		}
 	}
 
-	std::array<float, 3> CustomSkillsInterface::QuerySkillProgress(const char* a_skillId)
+	std::array<float, 4> CustomSkillsInterface::QuerySkillProgress(const char* a_skillId)
 	{
 		if (const auto skill = CustomSkillsManager::FindSkill(a_skillId)) {
-			float a_level = 1.0f;
-			float a_xp = 0.0f;
-			float a_legendary = 0;
-			if (skill->Level) {
-				a_level = skill->Level->value;
-			}
-			if (skill->Ratio) {
-				a_xp = skill->Ratio->value;
-			}
-			if (skill->Legendary) {
-				a_legendary = skill->Legendary->value;
-			}
-			return std::to_array<float>({a_level, a_xp, a_legendary});
+			return skill->QuerySkillProgress();
 		}
 		return {};
 	}

@@ -44,9 +44,9 @@ namespace CustomSkills
 		 * Get the xp, level and threshold of a skill.
 		 *
 		 * @param[in] a_skillId The ID of the skill to query.
-		 * @return An array consisting of [0] = level, [1] = xp, [2] = legendary
+		 * @return An array consisting of [0] = level, [1] = xp, [2] = level threshold, [3] = legendary
 		 */
-		std::array<float, 3> QuerySkillProgress(const char* a_skillId);
+		std::array<float, 4> QuerySkillProgress(const char* a_skillId);
 
 		/**
 		 * Advance the given skill by the provided amount of skill usage.
