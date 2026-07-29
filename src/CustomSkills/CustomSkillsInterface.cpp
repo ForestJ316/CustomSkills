@@ -19,6 +19,7 @@ namespace CustomSkills::Impl
 		static detail::CustomSkillsInterface intfc{
 			.interfaceVersion = InterfaceVersion,
 			.ShowStatsMenu = &ShowStatsMenu,
+			.QuerySkillProgress = &QuerySkillProgress,
 			.AdvanceSkill = &AdvanceSkill,
 			.IncrementSkill = &IncrementSkill,
 			.GetEventDispatcher = &GetEventDispatcher,
@@ -36,6 +37,26 @@ namespace CustomSkills::Impl
 			origin->LastSelectedTree = static_cast<std::uint32_t>(index);
 			CustomSkillsManager::OpenStatsMenu(origin);
 		}
+	}
+
+	std::array<float, 3> CustomSkillsInterface::QuerySkillProgress(const char* a_skillId)
+	{
+		if (const auto skill = CustomSkillsManager::FindSkill(a_skillId)) {
+			float a_level = 1.0f;
+			float a_xp = 0.0f;
+			float a_legendary = 0;
+			if (skill->Level) {
+				a_level = skill->Level->value;
+			}
+			if (skill->Ratio) {
+				a_xp = skill->Ratio->value;
+			}
+			if (skill->Legendary) {
+				a_legendary = skill->Legendary->value;
+			}
+			return std::to_array<float>({a_level, a_xp, a_legendary});
+		}
+		return {};
 	}
 
 	void CustomSkillsInterface::AdvanceSkill(const char* a_skillId, float a_magnitude)
