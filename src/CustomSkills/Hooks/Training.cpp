@@ -17,7 +17,7 @@ namespace CustomSkills
 
 	void Training::MenuSkillPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::TrainingMenu::SetTrainer, 0x63);
+		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::TrainingMenu::SetupMenu, 0x63);
 		REL::make_pattern<"E8">().match_or_fail(hook.address());
 
 		using GetTeachesSkill_t = RE::ActorValue(RE::TESClass::*)() const;
@@ -82,7 +82,7 @@ namespace CustomSkills
 
 	void Training::MaxLevelPatch()
 	{
-		auto GetMaximumTrainingLevel = +[](const RE::TESClass* a_class) -> std::uint32_t
+		auto GetTrainingSkillLevel = +[](const RE::TESClass* a_class) -> std::uint32_t
 		{
 			if (CustomSkillsManager::IsOurTrainingMode()) {
 				return CustomSkillsManager::_trainingMax;
@@ -90,9 +90,9 @@ namespace CustomSkills
 			return a_class->data.maximumTrainingLevel;
 		};
 
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::TESClass::GetMaximumTrainingLevel);
+		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::TESClass::GetTrainingSkillLevel);
 		REL::safe_fill(hook.address(), 0x10, REL::INT3);
-		util::write_14branch(hook.address(), GetMaximumTrainingLevel);
+		util::write_14branch(hook.address(), GetTrainingSkillLevel);
 	}
 
 	void Training::IncrementSkillPatch()

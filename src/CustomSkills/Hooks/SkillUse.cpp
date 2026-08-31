@@ -72,7 +72,7 @@ namespace CustomSkills
 		return nullptr;
 	}
 
-	static bool UpdateBottomBar(RE::CraftingSubMenus::ConstructibleObjectMenu* a_menu)
+	static bool UpdateSelectedItemDisplay(RE::CraftingSubMenus::ConstructibleObjectMenu* a_menu)
 	{
 		const auto skill = GetWorkbenchSkill(a_menu->furniture);
 		if (!skill)
@@ -91,7 +91,7 @@ namespace CustomSkills
 	void SkillUse::ConstructibleObjectBottomBarPatch()
 	{
 		auto hook = REL::Relocation<std::uintptr_t>(
-			RE::Offset::CraftingSubMenus::ConstructibleObjectMenu::UpdateBottomBar,
+			RE::Offset::CraftingSubMenus::ConstructibleObjectMenu::UpdateSelectedItemDisplay,
 			0x37D);
 		REL::make_pattern<"80 F9 11 77 0D">().match_or_fail(hook.address());
 
@@ -126,7 +126,9 @@ namespace CustomSkills
 			}
 		};
 
-		auto patch = new Patch(hook.address(), reinterpret_cast<std::uintptr_t>(&UpdateBottomBar));
+		auto patch = new Patch(
+			hook.address(),
+			reinterpret_cast<std::uintptr_t>(&UpdateSelectedItemDisplay));
 		patch->ready();
 
 		// TRAMPOLINE: 14
@@ -144,7 +146,7 @@ namespace CustomSkills
 	void SkillUse::ConstructibleObjectCreationPatch()
 	{
 		auto hook = REL::Relocation<std::uintptr_t>(
-			RE::Offset::CraftingSubMenus::ConstructibleObjectMenu::CreationConfirmed,
+			RE::Offset::CraftingSubMenus::ConstructibleObjectMenu::FinishCraftItem,
 			0x83);
 		REL::make_pattern<"83 F8 11 77 1E">().match_or_fail(hook.address());
 

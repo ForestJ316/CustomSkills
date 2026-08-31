@@ -17,7 +17,7 @@ namespace CustomSkills
 		RequirementsTextPatch();
 	}
 
-	void SkillProgress::GetSkillProgress(
+	void SkillProgress::GetSkillInfo(
 		RE::PlayerCharacter::PlayerSkills* a_playerSkills,
 		RE::ActorValue a_skill,
 		float* a_level,
@@ -88,15 +88,18 @@ namespace CustomSkills
 
 	void SkillProgress::SkillProgressPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::PlayerSkills::GetSkillProgress);
+		auto hook = REL::Relocation<std::uintptr_t>(
+			RE::Offset::CharacterProgression::GetSkillInfo);
 
 		REL::safe_fill(hook.address(), REL::INT3, 0x50);
-		util::write_14branch(hook.address(), &SkillProgress::GetSkillProgress);
+		util::write_14branch(hook.address(), &SkillProgress::GetSkillInfo);
 	}
 
 	void SkillProgress::HideLevelPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::StatsMenu::SetSkillInfo, 0x108F);
+		auto hook = REL::Relocation<std::uintptr_t>(
+			RE::Offset::StatsMenu::UpdateDescriptionCard,
+			0x108F);
 
 		REL::make_pattern<"80 3D ?? ?? ?? ?? 00">().match_or_fail(hook.address());
 
@@ -147,10 +150,10 @@ namespace CustomSkills
 
 	void SkillProgress::RequirementsTextPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::BGSPerk::GetRequirementsText);
+		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::BGSPerk::BuildDescriptionString);
 
 		REL::safe_fill(hook.address(), REL::INT3, 0x100);
-		util::write_14branch(hook.address(), &GetRequirementsText);
+		util::write_14branch(hook.address(), &BuildDescriptionString);
 	}
 
 	void SkillProgress::ModifyPerkCount(RE::StatsMenu* a_statsMenu, std::int32_t a_countDelta)
@@ -183,7 +186,7 @@ namespace CustomSkills
 		}
 	}
 
-	void SkillProgress::GetRequirementsText(
+	void SkillProgress::BuildDescriptionString(
 		RE::BGSPerk* a_perk,
 		char* a_buf,
 		std::int32_t a_bufLen,

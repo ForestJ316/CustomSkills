@@ -40,7 +40,7 @@ namespace CustomSkills
 					}
 					else {
 						REL::Relocation<std::uint32_t*> lastSelectedTree{
-							RE::Offset::StatsMenu::LastSelectedTree
+							RE::Offset::StatsMenu::uiLastViewedSkill
 						};
 
 						if (*lastSelectedTree < count) {

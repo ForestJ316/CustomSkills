@@ -25,7 +25,7 @@ namespace CustomSkills
 
 		static void ModifyPerkCount(RE::StatsMenu* a_statsMenu, std::int32_t a_countDelta);
 
-		static void GetSkillProgress(
+		static void GetSkillInfo(
 			RE::PlayerCharacter::PlayerSkills* a_playerSkills,
 			RE::ActorValue a_skill,
 			float* a_level,
@@ -33,7 +33,7 @@ namespace CustomSkills
 			float* a_levelThreshold,
 			std::uint32_t* a_legendary);
 
-		static void GetRequirementsText(
+		static void BuildDescriptionString(
 			RE::BGSPerk* a_perk,
 			char* a_buf,
 			std::int32_t a_bufLen,

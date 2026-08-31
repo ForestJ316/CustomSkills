@@ -20,7 +20,7 @@ namespace CustomSkills
 
 	void MenuSetup::MenuConstructorPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::StatsMenu::Create, 0x5D);
+		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::StatsMenu::CreateMenu, 0x5D);
 		REL::make_pattern<"E8">().match_or_fail(hook.address());
 
 		using StatsMenu_ctor_t = RE::StatsMenu*(RE::StatsMenu*);
@@ -89,7 +89,9 @@ namespace CustomSkills
 
 	void MenuSetup::CameraPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::StatsMenu::SetCameraTarget, 0x27E);
+		auto hook = REL::Relocation<std::uintptr_t>(
+			RE::Offset::StatsMenu::CreateStatsCamera,
+			0x27E);
 		REL::make_pattern<
 			"80 3D ?? ?? ?? ?? 00 "
 			"BA 02 00 00 00 "
@@ -212,7 +214,7 @@ namespace CustomSkills
 		auto SaveLastSelectedTree = +[](const RE::StatsMenu* a_statsMenu)
 		{
 			static REL::Relocation<std::uint32_t*> lastSelectedTree{
-				RE::Offset::StatsMenu::LastSelectedTree
+				RE::Offset::StatsMenu::uiLastViewedSkill
 			};
 
 			if (CustomSkillsManager::IsBeastMode()) {

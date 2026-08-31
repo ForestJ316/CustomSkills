@@ -17,7 +17,7 @@ namespace CustomSkills
 	void Navigation::SelectedTreePatch()
 	{
 		auto hook = REL::Relocation<std::uintptr_t>(
-			RE::Offset::StatsMenu::UpdateSelectedTree,
+			RE::Offset::StatsMenu::UpdateCurrentSkill,
 			0x5E);
 		REL::make_pattern<"8B 87 10 03 00 00">().match_or_fail(hook.address());
 
@@ -63,7 +63,7 @@ namespace CustomSkills
 
 	void Navigation::LockRotationPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::StatsMenu::Rotate, 0x46);
+		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::StatsMenu::RotateSkills, 0x46);
 		REL::make_pattern<"80 3D ?? ?? ?? ?? 00">().match_or_fail(hook.address());
 
 		util::write_disp(
@@ -74,7 +74,7 @@ namespace CustomSkills
 
 	void Navigation::RotationSpeedPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::StatsMenu::Rotate, 0x35A);
+		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::StatsMenu::RotateSkills, 0x35A);
 		REL::make_pattern<"F3 0F 59 F2 41 0F 2F F0">().match_or_fail(hook.address());
 
 		auto ModRotationSpeed = +[](std::uint32_t a_numTrees, float a_t) -> float
