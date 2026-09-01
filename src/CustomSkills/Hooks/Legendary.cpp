@@ -20,7 +20,7 @@ namespace CustomSkills
 			0x20D);
 		REL::make_pattern<"E8">().match_or_fail(hook.address());
 
-		using MakeLegendary_t = void(RE::PlayerCharacter::PlayerSkills::*)(RE::ActorValue);
+		using MakeLegendary_t = void (RE::PlayerCharacter::PlayerSkills::*)(RE::ActorValue);
 		static REL::Relocation<MakeLegendary_t> _MakeLegendary;
 
 		auto MakeLegendary = +[](RE::PlayerCharacter::PlayerSkills* a_playerSkills,

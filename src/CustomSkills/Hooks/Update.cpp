@@ -19,7 +19,7 @@ namespace CustomSkills
 		// TRAMPOLINE: 14
 		auto& trampoline = SKSE::GetTrampoline();
 
-		using DoFrame_t = void(RE::Main::*)();
+		using DoFrame_t = void (RE::Main::*)();
 		static REL::Relocation<DoFrame_t> _DoFrame;
 
 		auto DoFrame = +[](RE::Main* a_main)

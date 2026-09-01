@@ -20,7 +20,7 @@ namespace CustomSkills
 		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::TrainingMenu::SetupMenu, 0x63);
 		REL::make_pattern<"E8">().match_or_fail(hook.address());
 
-		using GetTeachesSkill_t = RE::ActorValue(RE::TESClass::*)() const;
+		using GetTeachesSkill_t = RE::ActorValue (RE::TESClass::*)() const;
 		static REL::Relocation<GetTeachesSkill_t> _GetTeachesSkill;
 
 		auto GetTeachesSkill = +[](const RE::TESClass* a_class) -> RE::ActorValue
