@@ -38,7 +38,7 @@ namespace CustomSkills
 	{
 		auto hook = REL::Relocation<std::uintptr_t>(
 			RE::Offset::StatsMenu::HandleMovement,
-			0x5A6);
+			REL::Module::get().version() >= SKSE::RUNTIME_1_7_99 ? 0x5C8 : 0x5A6);
 		REL::make_pattern<"80 3D">().match_or_fail(hook.address());
 
 		util::write_disp(

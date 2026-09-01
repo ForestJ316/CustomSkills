@@ -58,7 +58,7 @@ namespace CustomSkills
 				color.SetString(Game::GetActorValueColor(actorValue));
 
 				const auto player = RE::PlayerCharacter::GetSingleton();
-				const auto playerSkills = player ? player->skills : nullptr;
+				const auto playerSkills = player ? player->PlayerCharacterData()->skills : nullptr;
 				const std::size_t idx = util::to_underlying(actorValue) - 6;
 				if (playerSkills && idx < 18) {
 					const auto& data = playerSkills->data->skills[idx];

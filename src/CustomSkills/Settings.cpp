@@ -39,9 +39,8 @@ namespace CustomSkills
 						firstInit = false;
 					}
 					else {
-						REL::Relocation<std::uint32_t*> lastSelectedTree{
-							RE::Offset::StatsMenu::uiLastViewedSkill
-						};
+						REL::Relocation<std::uint32_t*> lastSelectedTree{ STATIC_OFFSET(
+							StatsMenu::uiLastViewedSkill) };
 
 						if (*lastSelectedTree < count) {
 							group->LastSelectedTree = *lastSelectedTree;

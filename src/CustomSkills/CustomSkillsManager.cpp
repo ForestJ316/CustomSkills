@@ -93,8 +93,10 @@ namespace CustomSkills
 
 	bool CustomSkillsManager::IsMenuControlsEnabled()
 	{
-		static REL::Relocation<bool()> func{ REL::ID(55484) };
-		return func();
+		static REL::Relocation<bool(RE::BSScript::IVirtualMachine*, std::uint32_t, void*)> func{
+			STATIC_OFFSET(SkyrimScript::Game_IsMenuControlsEnabled)
+		};
+		return func(nullptr, 0, nullptr);
 	}
 
 	bool CustomSkillsManager::IsStatsMenuOpen()
@@ -135,7 +137,8 @@ namespace CustomSkills
 		}
 
 		if (const auto player = RE::PlayerCharacter::GetSingleton()) {
-			return static_cast<std::uint32_t>(player->perkCount);
+			const auto playerData = player->PlayerCharacterData();
+			return static_cast<std::uint32_t>(playerData->perkCount);
 		}
 
 		return 0;
@@ -151,7 +154,8 @@ namespace CustomSkills
 		}
 
 		if (const auto player = RE::PlayerCharacter::GetSingleton()) {
-			player->perkCount = a_value;
+			const auto playerData = player->PlayerCharacterData();
+			playerData->perkCount = a_value;
 		}
 	}
 
@@ -168,7 +172,7 @@ namespace CustomSkills
 
 	void CustomSkillsManager::SetBeastMode(bool a_beastMode)
 	{
-		REL::Relocation<bool*> isBeastMode{ REL::ID(RE::Offset::IsBeastMode) };
+		REL::Relocation<bool*> isBeastMode{ STATIC_OFFSET(IsBeastMode) };
 		*isBeastMode.get() = a_beastMode;
 		UpdateVars();
 	}
@@ -180,7 +184,7 @@ namespace CustomSkills
 
 	bool CustomSkillsManager::IsBeastMode()
 	{
-		REL::Relocation<bool*> isBeastMode{ RE::Offset::IsBeastMode };
+		REL::Relocation<bool*> isBeastMode{ STATIC_OFFSET(IsBeastMode) };
 		return *isBeastMode.get();
 	}
 

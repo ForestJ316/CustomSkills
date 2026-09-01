@@ -161,10 +161,12 @@ namespace CustomSkills
 		if (CustomSkillsManager::IsOurMenuMode()) {
 			if (a_countDelta > 0) {
 				if (const auto player = RE::PlayerCharacter::GetSingleton()) {
-					std::int32_t oldCount = player->perkCount;
+					const auto playerData = player->PlayerCharacterData();
+					std::int32_t oldCount = playerData->perkCount;
 					std::int32_t newCount = oldCount + a_countDelta;
 					if (newCount > oldCount && oldCount != 255) {
-						player->perkCount = static_cast<std::uint8_t>((std::min)(255, newCount));
+						playerData->perkCount = static_cast<std::uint8_t>(
+							(std::min)(255, newCount));
 					}
 				}
 			}

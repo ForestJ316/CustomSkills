@@ -58,7 +58,9 @@ namespace CustomSkills
 
 	void MenuSetup::SkillDomeArtPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::StatsMenu::Ctor, 0x413);
+		auto hook = REL::Relocation<std::uintptr_t>(
+			RE::Offset::StatsMenu::Ctor,
+			REL::Module::get().version() >= SKSE::RUNTIME_1_7_99 ? 0x483 : 0x413);
 		REL::make_pattern<"E8">().match_or_fail(hook.address());
 
 		using RequestModelAsync_t = RE::BSResource::ErrorCode(

@@ -43,6 +43,11 @@ namespace RE
 			inline constexpr auto Vtbl_ActorValueOwner = REL::ID(208050);
 		}
 
+		namespace SkyrimScript
+		{
+			inline constexpr auto Game_IsMenuControlsEnabled = REL::ID(55484);
+		}
+
 		namespace StatsMenu
 		{
 			inline constexpr auto BuildSnapNodes = REL::ID(52540);

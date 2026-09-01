@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.30)
 
 project(
 	CustomSkills
-	VERSION 3.1.0
+	VERSION 3.1.1
 	LANGUAGES CXX
 )
 
@@ -30,6 +30,11 @@ SKSEPlugin_Add(
 		vcpkg.json
 	PRECOMPILE_HEADERS
 		src/PCH/PCH.h
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+	INTERPROCEDURAL_OPTIMIZATION TRUE
+	INTERPROCEDURAL_OPTIMIZATION_DEBUG FALSE
 )
 
 find_path(SIMPLEINI_INCLUDE_DIRS "SimpleIni.h")

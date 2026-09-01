@@ -171,7 +171,7 @@ namespace CustomSkills
 	{
 		auto hook = REL::Relocation<std::uintptr_t>(
 			RE::Offset::StatsMenu::HandleMovement,
-			0x2A1);
+			REL::Module::get().version() >= SKSE::RUNTIME_1_7_99 ? 0x2C3 : 0x2A1);
 		REL::make_pattern<"4C 63 B7 C0 01 00 00">().match_or_fail(hook.address());
 
 		auto ExitTree = +[](std::uint32_t a_index)
