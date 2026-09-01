@@ -6,6 +6,8 @@
 
 #include <xbyak/xbyak.h>
 
+#pragma section(".jit", execute)
+
 namespace CustomSkills
 {
 	void MenuSetup::WriteHooks()
@@ -164,9 +166,13 @@ namespace CustomSkills
 			return CustomSkillsManager::GetCurrentSkillCount() + 6;
 		};
 
+		__declspec(allocate(".jit")) alignas(16) static auto buffer1 = util::jit_buffer<48>();
+		__declspec(allocate(".jit")) alignas(16) static auto buffer2 = util::jit_buffer<48>();
+
 		struct Patch : Xbyak::CodeGenerator
 		{
-			Patch(std::uintptr_t a_funcAddr, std::uintptr_t a_retnAddr)
+			Patch(decltype(buffer1)& buffer, std::uintptr_t a_funcAddr, std::uintptr_t a_retnAddr)
+				: Xbyak::CodeGenerator(buffer.size(), buffer.data())
 			{
 				Xbyak::Label funcLbl;
 				Xbyak::Label retnLbl;
@@ -186,21 +192,29 @@ namespace CustomSkills
 		// TRAMPOLINE: 16
 		auto& trampoline = SKSE::GetTrampoline();
 
-		auto patch1 = new Patch(
-			reinterpret_cast<std::uintptr_t>(GetMaxSkillIndex),
-			hook1.address() + 0x7);
-		patch1->ready();
+		if (auto ctx = REL::safe_write_context(buffer1.data(), buffer1.size())) {
+			auto patch = Patch(
+				buffer1,
+				reinterpret_cast<std::uintptr_t>(GetMaxSkillIndex),
+				hook1.address() + 0x7);
+			patch.ready();
+			assert(((patch.getSize() + 0xF) & ~0xF) == buffer1.size());
+		}
 
 		REL::safe_fill(hook1.address(), REL::NOP, 0x7);
-		trampoline.write_branch<6>(hook1.address(), patch1->getCode());
+		trampoline.write_branch<6>(hook1.address(), buffer1.data());
 
-		auto patch2 = new Patch(
-			reinterpret_cast<std::uintptr_t>(GetMaxSkillIndex),
-			hook2.address() + 0x7);
-		patch2->ready();
+		if (auto ctx = REL::safe_write_context(buffer2.data(), buffer2.size())) {
+			auto patch = Patch(
+				buffer2,
+				reinterpret_cast<std::uintptr_t>(GetMaxSkillIndex),
+				hook2.address() + 0x7);
+			patch.ready();
+			assert(((patch.getSize() + 0xF) & ~0xF) == buffer2.size());
+		}
 
 		REL::safe_fill(hook2.address(), REL::NOP, 0x7);
-		trampoline.write_branch<6>(hook2.address(), patch2->getCode());
+		trampoline.write_branch<6>(hook2.address(), buffer2.data());
 	}
 
 	void MenuSetup::CloseMenuPatch()

@@ -19,6 +19,15 @@ namespace util
 	using SKSE::stl::report_and_fail;
 	using SKSE::stl::to_underlying;
 
+	template <std::size_t N>
+	[[nodiscard]] inline consteval std::array<std::uint8_t, N> jit_buffer()
+	{
+		return []<std::size_t... I>(std::index_sequence<I...>)
+		{
+			return std::array<std::uint8_t, N>{ { (static_cast<void>(I), REL::INT3)... } };
+		}(std::make_index_sequence<N>());
+	}
+
 	template <typename T>
 	inline void write_disp(std::uintptr_t a_dst, std::uintptr_t a_rip, REL::Relocation<T*>& a_var)
 	{
@@ -93,7 +102,6 @@ namespace util
 
 			return shorter;
 		}
-
 	};
 
 	template <typename T, typename Allocator = std::allocator<std::pair<const std::string, T>>>

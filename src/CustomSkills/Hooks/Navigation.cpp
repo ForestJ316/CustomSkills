@@ -5,6 +5,8 @@
 
 #include <xbyak/xbyak.h>
 
+#pragma section(".jit", execute)
+
 namespace CustomSkills
 {
 	void Navigation::WriteHooks()
@@ -82,9 +84,13 @@ namespace CustomSkills
 			return a_t * 18.0f / a_numTrees;
 		};
 
+		__declspec(allocate(".jit")) alignas(
+			16) static constinit auto buffer = util::jit_buffer<48>();
+
 		struct Patch : Xbyak::CodeGenerator
 		{
 			Patch(std::uintptr_t a_funcAddr, std::uintptr_t a_retnAddr)
+				: Xbyak::CodeGenerator(buffer.size(), buffer.data())
 			{
 				Xbyak::Label funcLbl;
 				Xbyak::Label retnLbl;
@@ -104,14 +110,17 @@ namespace CustomSkills
 			}
 		};
 
-		auto patch = new Patch(
-			reinterpret_cast<std::uintptr_t>(ModRotationSpeed),
-			hook.address() + 0x8);
-		patch->ready();
+		if (auto ctx = REL::safe_write_context(buffer.data(), buffer.size())) {
+			auto patch = Patch(
+				reinterpret_cast<std::uintptr_t>(ModRotationSpeed),
+				hook.address() + 0x8);
+			patch.ready();
+			assert(((patch.getSize() + 0xF) & ~0xF) == buffer.size());
+		}
 
 		// TRAMPOLINE: 8
 		auto& trampoline = SKSE::GetTrampoline();
 		REL::safe_fill(hook.address(), REL::NOP, 0x8);
-		trampoline.write_branch<6>(hook.address(), patch->getCode());
+		trampoline.write_branch<6>(hook.address(), buffer.data());
 	}
 }
