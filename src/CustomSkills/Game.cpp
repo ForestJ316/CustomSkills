@@ -12,28 +12,28 @@ namespace CustomSkills
 		float a_secsBeforeFade)
 	{
 		using func_t = decltype(&FadeOutGame);
-		REL::Relocation<func_t> func{ RE::Offset::FadeOutGame };
+		REL::Relocation<func_t> func{ STATIC_OFFSET(FadeOutGame) };
 		return func(a_fadingOut, a_blackFade, a_fadeDuration, a_arg4, a_secsBeforeFade);
 	}
 
 	RE::ActorValueInfo* Game::GetActorValueInfo(RE::ActorValue a_actorValue)
 	{
 		using func_t = decltype(&GetActorValueInfo);
-		REL::Relocation<func_t> func{ RE::Offset::GetActorValueInfo };
+		REL::Relocation<func_t> func{ STATIC_OFFSET(GetActorValueInfo) };
 		return func(a_actorValue);
 	}
 
 	const char* Game::GetActorValueName(RE::ActorValue a_actorValue)
 	{
 		using func_t = decltype(&GetActorValueName);
-		REL::Relocation<func_t> func{ RE::Offset::GetActorValueName };
+		REL::Relocation<func_t> func{ STATIC_OFFSET(GetActorValueName) };
 		return func(a_actorValue);
 	}
 
 	const char* Game::GetActorValueColor(RE::ActorValue a_actorValue)
 	{
 		using func_t = decltype(&GetActorValueColor);
-		REL::Relocation<func_t> func{ RE::Offset::GetActorValueColor };
+		REL::Relocation<func_t> func{ STATIC_OFFSET(GetActorValueColor) };
 		return func(a_actorValue);
 	}
 
@@ -45,7 +45,7 @@ namespace CustomSkills
 			}
 		}
 
-		REL::Relocation<bool*> isInMenuMode{ RE::Offset::IsInMenuMode };
+		REL::Relocation<bool*> isInMenuMode{ STATIC_OFFSET(IsInMenuMode) };
 		if (*isInMenuMode.get()) {
 			return true;
 		}
@@ -62,14 +62,14 @@ namespace CustomSkills
 	void Game::OpenStatsMenu(bool a_isBeastMode)
 	{
 		using func_t = decltype(&OpenStatsMenu);
-		REL::Relocation<func_t> func{ RE::Offset::OpenStatsMenu };
+		REL::Relocation<func_t> func{ STATIC_OFFSET(OpenStatsMenu) };
 		return func(a_isBeastMode);
 	}
 
 	void Game::ShowTrainingMenu(RE::Actor* a_trainer)
 	{
 		using func_t = decltype(&ShowTrainingMenu);
-		REL::Relocation<func_t> func{ RE::Offset::ShowTrainingMenu };
+		REL::Relocation<func_t> func{ STATIC_OFFSET(ShowTrainingMenu) };
 		return func(a_trainer);
 	}
 
@@ -80,7 +80,7 @@ namespace CustomSkills
 		RE::BGSQuestObjective* a_questObjective)
 	{
 		using func_t = decltype(&ShowHUDMessage);
-		REL::Relocation<func_t> func{ RE::Offset::ShowHUDMessage };
+		REL::Relocation<func_t> func{ STATIC_OFFSET(ShowHUDMessage) };
 		return func(a_messageType, a_message, a_owningQuest, a_questObjective);
 	}
 

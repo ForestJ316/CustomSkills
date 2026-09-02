@@ -5,6 +5,8 @@
 
 #include <xbyak/xbyak.h>
 
+#pragma section(".jit", execute)
+
 namespace CustomSkills
 {
 	void SkillUse::WriteHooks()
@@ -72,7 +74,7 @@ namespace CustomSkills
 		return nullptr;
 	}
 
-	static bool UpdateBottomBar(RE::CraftingSubMenus::ConstructibleObjectMenu* a_menu)
+	static bool UpdateSelectedItemDisplay(RE::CraftingSubMenus::ConstructibleObjectMenu* a_menu)
 	{
 		const auto skill = GetWorkbenchSkill(a_menu->furniture);
 		if (!skill)
@@ -91,20 +93,24 @@ namespace CustomSkills
 	void SkillUse::ConstructibleObjectBottomBarPatch()
 	{
 		auto hook = REL::Relocation<std::uintptr_t>(
-			RE::Offset::CraftingSubMenus::ConstructibleObjectMenu::UpdateBottomBar,
+			RE::Offset::CraftingSubMenus::ConstructibleObjectMenu::UpdateSelectedItemDisplay,
 			0x37D);
 		REL::make_pattern<"80 F9 11 77 0D">().match_or_fail(hook.address());
+
+		__declspec(allocate(".jit")) alignas(
+			16) static constinit auto buffer = util::jit_buffer<80>();
 
 		struct Patch : Xbyak::CodeGenerator
 		{
 			Patch(std::uintptr_t a_hookAddr, std::uintptr_t a_funcAddr)
+				: Xbyak::CodeGenerator(buffer.size(), buffer.data())
 			{
 				Xbyak::Label customSkill;
 				Xbyak::Label noSkill;
 				Xbyak::Label funcLbl;
 
 				cmp(cl, 0x11);
-				ja(customSkill);
+				ja(customSkill, T_SHORT);
 				jmp(ptr[rip]);
 				dq(a_hookAddr + 0x5);
 
@@ -112,7 +118,7 @@ namespace CustomSkills
 				mov(rcx, rdi);
 				call(ptr[rip + funcLbl]);
 				cmp(al, 0);
-				jz(noSkill);
+				jz(noSkill, T_SHORT);
 
 				jmp(ptr[rip]);
 				dq(a_hookAddr + 0xD);
@@ -126,12 +132,17 @@ namespace CustomSkills
 			}
 		};
 
-		auto patch = new Patch(hook.address(), reinterpret_cast<std::uintptr_t>(&UpdateBottomBar));
-		patch->ready();
+		if (auto ctx = REL::safe_write_context(buffer.data(), buffer.size())) {
+			auto patch = Patch(
+				hook.address(),
+				reinterpret_cast<std::uintptr_t>(&UpdateSelectedItemDisplay));
+			patch.ready();
+			assert(((patch.getSize() + 0xF) & ~0xF) == buffer.size());
+		}
 
 		// TRAMPOLINE: 14
 		auto& trampoline = SKSE::GetTrampoline();
-		trampoline.write_branch<5>(hook.address(), patch->getCode());
+		trampoline.write_branch<5>(hook.address(), buffer.data());
 	}
 
 	static void UseWorkbench(const RE::TESFurniture* a_furniture, float a_amount)
@@ -144,13 +155,16 @@ namespace CustomSkills
 	void SkillUse::ConstructibleObjectCreationPatch()
 	{
 		auto hook = REL::Relocation<std::uintptr_t>(
-			RE::Offset::CraftingSubMenus::ConstructibleObjectMenu::CreationConfirmed,
+			RE::Offset::CraftingSubMenus::ConstructibleObjectMenu::FinishCraftItem,
 			0x83);
 		REL::make_pattern<"83 F8 11 77 1E">().match_or_fail(hook.address());
+
+		__declspec(allocate(".jit")) alignas(16) static auto buffer = util::jit_buffer<64>();
 
 		struct Patch : Xbyak::CodeGenerator
 		{
 			Patch(std::uintptr_t a_hookAddr, std::uintptr_t a_funcAddr)
+				: Xbyak::CodeGenerator(buffer.size(), buffer.data())
 			{
 				Xbyak::Label customSkill;
 				Xbyak::Label funcLbl;
@@ -174,12 +188,15 @@ namespace CustomSkills
 			}
 		};
 
-		auto patch = new Patch(hook.address(), reinterpret_cast<std::uintptr_t>(&UseWorkbench));
-		patch->ready();
+		if (auto ctx = REL::safe_write_context(buffer.data(), buffer.size())) {
+			auto patch = Patch(hook.address(), reinterpret_cast<std::uintptr_t>(&UseWorkbench));
+			patch.ready();
+			assert(((patch.getSize() + 0xF) & ~0xF) == buffer.size());
+		}
 
 		// TRAMPOLINE: 14
 		auto& trampoline = SKSE::GetTrampoline();
-		trampoline.write_branch<5>(hook.address(), patch->getCode());
+		trampoline.write_branch<5>(hook.address(), buffer.data());
 	}
 
 	void SkillUse::UseSkill(

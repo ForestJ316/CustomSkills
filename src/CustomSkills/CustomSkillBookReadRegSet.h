@@ -22,7 +22,10 @@ namespace CustomSkills
 			std::uint32_t a_version);
 		bool Save(SKSE::SerializationInterface* a_intfc);
 		bool Load(SKSE::SerializationInterface* a_intfc);
-		void SendEvent(std::string_view a_skillId, std::int32_t a_increment);
+		void SendEvent(
+			RE::TESObjectBOOK* a_skillBook,
+			std::string_view a_skillId,
+			std::int32_t a_increment);
 
 		void ObjectDeleted(RE::VMHandle a_handle);
 

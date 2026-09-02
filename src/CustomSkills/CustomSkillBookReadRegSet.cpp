@@ -195,7 +195,10 @@ namespace CustomSkills
 		}
 	}
 
-	void CustomSkillBookReadRegSet::SendEvent(std::string_view a_skillId, std::int32_t a_increment)
+	void CustomSkillBookReadRegSet::SendEvent(
+		RE::TESObjectBOOK* a_skillBook,
+		std::string_view a_skillId,
+		std::int32_t a_increment)
 	{
 		RE::BSFixedString eventName(EventName);
 
@@ -203,8 +206,9 @@ namespace CustomSkills
 		bool runDefault = true;
 		for (auto& [handle, replaceDefault] : _handles) {
 			auto args = RE::MakeFunctionArguments(
-				RE::BSFixedString(a_skillId),
-				std::int32_t(a_increment));
+				static_cast<RE::TESObjectBOOK*>(a_skillBook),
+				static_cast<RE::BSFixedString>(a_skillId),
+				static_cast<std::int32_t>(a_increment));
 			vm->SendEvent(handle, eventName, args);
 			runDefault &= !replaceDefault;
 		}

@@ -1,7 +1,7 @@
 Scriptname CustomSkills Hidden
 
 ; Get the current Custom Skills API version.
-; Current version: 3
+; Current version: 4
 int Function GetAPIVersion() global native
 
 ; Open the custom skill menu for the given skill or group (config file).

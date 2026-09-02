@@ -6,6 +6,8 @@
 
 #include <xbyak/xbyak.h>
 
+#pragma section(".jit", execute)
+
 namespace CustomSkills
 {
 	void MenuSetup::WriteHooks()
@@ -20,7 +22,7 @@ namespace CustomSkills
 
 	void MenuSetup::MenuConstructorPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::StatsMenu::Create, 0x5D);
+		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::StatsMenu::CreateMenu, 0x5D);
 		REL::make_pattern<"E8">().match_or_fail(hook.address());
 
 		using StatsMenu_ctor_t = RE::StatsMenu*(RE::StatsMenu*);
@@ -58,7 +60,9 @@ namespace CustomSkills
 
 	void MenuSetup::SkillDomeArtPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::StatsMenu::Ctor, 0x413);
+		auto hook = REL::Relocation<std::uintptr_t>(
+			RE::Offset::StatsMenu::Ctor,
+			REL::Module::get().version() >= SKSE::RUNTIME_1_7_99 ? 0x483 : 0x413);
 		REL::make_pattern<"E8">().match_or_fail(hook.address());
 
 		using RequestModelAsync_t = RE::BSResource::ErrorCode(
@@ -89,7 +93,9 @@ namespace CustomSkills
 
 	void MenuSetup::CameraPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::StatsMenu::SetCameraTarget, 0x27E);
+		auto hook = REL::Relocation<std::uintptr_t>(
+			RE::Offset::StatsMenu::CreateStatsCamera,
+			0x27E);
 		REL::make_pattern<
 			"80 3D ?? ?? ?? ?? 00 "
 			"BA 02 00 00 00 "
@@ -160,9 +166,13 @@ namespace CustomSkills
 			return CustomSkillsManager::GetCurrentSkillCount() + 6;
 		};
 
+		__declspec(allocate(".jit")) alignas(16) static auto buffer1 = util::jit_buffer<48>();
+		__declspec(allocate(".jit")) alignas(16) static auto buffer2 = util::jit_buffer<48>();
+
 		struct Patch : Xbyak::CodeGenerator
 		{
-			Patch(std::uintptr_t a_funcAddr, std::uintptr_t a_retnAddr)
+			Patch(decltype(buffer1)& buffer, std::uintptr_t a_funcAddr, std::uintptr_t a_retnAddr)
+				: Xbyak::CodeGenerator(buffer.size(), buffer.data())
 			{
 				Xbyak::Label funcLbl;
 				Xbyak::Label retnLbl;
@@ -182,21 +192,29 @@ namespace CustomSkills
 		// TRAMPOLINE: 16
 		auto& trampoline = SKSE::GetTrampoline();
 
-		auto patch1 = new Patch(
-			reinterpret_cast<std::uintptr_t>(GetMaxSkillIndex),
-			hook1.address() + 0x7);
-		patch1->ready();
+		if (auto ctx = REL::safe_write_context(buffer1.data(), buffer1.size())) {
+			auto patch = Patch(
+				buffer1,
+				reinterpret_cast<std::uintptr_t>(GetMaxSkillIndex),
+				hook1.address() + 0x7);
+			patch.ready();
+			assert(((patch.getSize() + 0xF) & ~0xF) == buffer1.size());
+		}
 
 		REL::safe_fill(hook1.address(), REL::NOP, 0x7);
-		trampoline.write_branch<6>(hook1.address(), patch1->getCode());
+		trampoline.write_branch<6>(hook1.address(), buffer1.data());
 
-		auto patch2 = new Patch(
-			reinterpret_cast<std::uintptr_t>(GetMaxSkillIndex),
-			hook2.address() + 0x7);
-		patch2->ready();
+		if (auto ctx = REL::safe_write_context(buffer2.data(), buffer2.size())) {
+			auto patch = Patch(
+				buffer2,
+				reinterpret_cast<std::uintptr_t>(GetMaxSkillIndex),
+				hook2.address() + 0x7);
+			patch.ready();
+			assert(((patch.getSize() + 0xF) & ~0xF) == buffer2.size());
+		}
 
 		REL::safe_fill(hook2.address(), REL::NOP, 0x7);
-		trampoline.write_branch<6>(hook2.address(), patch2->getCode());
+		trampoline.write_branch<6>(hook2.address(), buffer2.data());
 	}
 
 	void MenuSetup::CloseMenuPatch()
@@ -212,7 +230,7 @@ namespace CustomSkills
 		auto SaveLastSelectedTree = +[](const RE::StatsMenu* a_statsMenu)
 		{
 			static REL::Relocation<std::uint32_t*> lastSelectedTree{
-				RE::Offset::StatsMenu::LastSelectedTree
+				RE::Offset::StatsMenu::uiLastViewedSkill
 			};
 
 			if (CustomSkillsManager::IsBeastMode()) {
