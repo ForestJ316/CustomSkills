@@ -11,8 +11,37 @@ namespace CustomSkills
 {
 	void Legendary::WriteHooks()
 	{
+		LegendaryAvailablePatch();
 		PlayerSkillsPatch();
 		RefundPerksPatch();
+	}
+
+	void Legendary::LegendaryAvailablePatch()
+	{
+		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::IsLegendaryDifficultyAvailable);
+
+		auto IsLegendaryAvailable = +[]()
+		{
+			if (*"iDifficultyLevelMax"_gs < 5) {
+				return false;
+			}
+
+			if (CustomSkillsManager::IsOurMenuMode()) {
+				const auto ui = RE::UI::GetSingleton();
+				const auto statsMenu = ui->GetMenu<RE::StatsMenu>();
+				const auto actorValue = static_cast<RE::ActorValue>(
+					CUSTOM_SKILL_BASE_VALUE + statsMenu->selectedTree);
+
+				if (const auto skill = CustomSkillsManager::GetCurrentSkill(actorValue)) {
+					return skill->Legendary != nullptr;
+				}
+			}
+
+			return true;
+		};
+
+		REL::safe_fill(hook.address(), REL::INT3, 0x10);
+		util::write_14branch(hook.address(), IsLegendaryAvailable);
 	}
 
 	void Legendary::PlayerSkillsPatch()
