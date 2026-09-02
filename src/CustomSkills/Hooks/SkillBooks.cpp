@@ -45,7 +45,7 @@ namespace CustomSkills
 				&count);
 
 			CustomSkillBookReadRegSet::Get()
-				->SendEvent(skill->ID, static_cast<std::int32_t>(count));
+				->SendEvent(a_book, skill->ID, static_cast<std::int32_t>(count));
 			return true;
 		}
 

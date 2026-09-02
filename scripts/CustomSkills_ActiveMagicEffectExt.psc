@@ -24,5 +24,5 @@ Function RegisterForCustomSkillBookRead(ActiveMagicEffect akReceiver, bool abRep
 Function UnregisterForCustomSkillBookRead(ActiveMagicEffect akReceiver) global native
 
 ; Copy this event to your script if you register for it.
-Event OnCustomSkillBookRead(string asSkillId, int aiIncrement)
+Event OnCustomSkillBookRead(Book akSkillBook, string asSkillId, int aiIncrement)
 EndEvent
