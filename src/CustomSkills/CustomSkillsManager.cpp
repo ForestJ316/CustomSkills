@@ -301,8 +301,7 @@ namespace CustomSkills
 				skillsList.emplace_back(skill->GetName());
 			}
 		}
-		std::string result = "";
-		result = std::accumulate(skillsList.begin(), skillsList.end(), std::string(),
+		auto result = std::accumulate(skillsList.begin(), skillsList.end(), std::string(),
 			[](const auto& a_str1, const auto& a_str2) {
 			return a_str1.empty() ? a_str2 : a_str1 + ", " + a_str2;
 		});
