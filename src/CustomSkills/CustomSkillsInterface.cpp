@@ -19,10 +19,10 @@ namespace CustomSkills::Impl
 		static detail::CustomSkillsInterface intfc{
 			.interfaceVersion = InterfaceVersion,
 			.ShowStatsMenu = &ShowStatsMenu,
-			.QuerySkillProgress = &QuerySkillProgress,
 			.AdvanceSkill = &AdvanceSkill,
 			.IncrementSkill = &IncrementSkill,
 			.GetEventDispatcher = &GetEventDispatcher,
+			.QuerySkillProgress = &QuerySkillProgress,
 		};
 		return std::addressof(intfc);
 	}
@@ -37,14 +37,6 @@ namespace CustomSkills::Impl
 			origin->LastSelectedTree = static_cast<std::uint32_t>(index);
 			CustomSkillsManager::OpenStatsMenu(origin);
 		}
-	}
-
-	std::array<float, 4> CustomSkillsInterface::QuerySkillProgress(const char* a_skillId)
-	{
-		if (const auto skill = CustomSkillsManager::FindSkill(a_skillId)) {
-			return skill->QuerySkillProgress();
-		}
-		return {};
 	}
 
 	void CustomSkillsInterface::AdvanceSkill(const char* a_skillId, float a_magnitude)
@@ -68,5 +60,13 @@ namespace CustomSkills::Impl
 			return SkillIncreaseEventSource::Get();
 		}
 		return nullptr;
+	}
+
+	SkillProgressData CustomSkillsInterface::QuerySkillProgress(const char* a_skillId)
+	{
+		if (const auto skill = CustomSkillsManager::FindSkill(a_skillId)) {
+			return skill->QuerySkillProgress();
+		}
+		return {};
 	}
 }

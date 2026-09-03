@@ -27,11 +27,6 @@ namespace CustomSkills
 		GetProxy()->ShowStatsMenu(a_skillId);
 	}
 
-	inline std::array<float, 4> CustomSkillsInterface::QuerySkillProgress(const char* a_skillId)
-	{
-		return GetProxy()->QuerySkillProgress(a_skillId);
-	}
-
 	inline void CustomSkillsInterface::AdvanceSkill(const char* a_skillId, float a_magnitude)
 	{
 		GetProxy()->AdvanceSkill(a_skillId, a_magnitude);
@@ -52,6 +47,11 @@ namespace CustomSkills
 	{
 		return static_cast<RE::BSTEventSource<T>*>(
 			GetProxy()->GetEventDispatcher(static_cast<std::uint32_t>(T::ID)));
+	}
+
+	inline SkillProgressData CustomSkillsInterface::QuerySkillProgress(const char* a_skillId)
+	{
+		return GetProxy()->QuerySkillProgress(a_skillId);
 	}
 
 	inline void QueryCustomSkillsInterface(

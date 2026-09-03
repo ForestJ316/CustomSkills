@@ -144,20 +144,18 @@ namespace CustomSkills
 		return true;
 	}
 
-	std::array<float, 4> Skill::QuerySkillProgress()
+	SkillProgressData Skill::QuerySkillProgress() const
 	{
 		if (!Level || !Ratio || !Info || !Info->skill) {
 			return {};
 		}
-		float a_level = Level->value;
-		float a_xp = Ratio->value;
-		float a_levelThreshold = CalcLevelThreshold(static_cast<std::int32_t>(a_level), Info->skill->improveMult, Info->skill->improveOffset);
-		// This might as well be 0 for the vast majority of cases
-		float a_legendary = 0.0f;
+		SkillProgressData skillProgress = {};
+		skillProgress.level = Level->value;
+		skillProgress.xp = Ratio->value;
+		skillProgress.levelThreshold = CalcLevelThreshold(static_cast<std::int32_t>(Level->value), Info->skill->improveMult, Info->skill->improveOffset);
 		if (Legendary) {
-			a_legendary = Legendary->value;
+			skillProgress.legendary = Legendary->value;
 		}
-		
-		return std::to_array<float>({ a_level, a_xp, a_levelThreshold, a_legendary });
+		return skillProgress;
 	}
 }

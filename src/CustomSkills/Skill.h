@@ -7,6 +7,15 @@ namespace CustomSkills
 	// magic number so we don't conflict with other mods using the same mechanism for AVs
 	constexpr std::uint32_t CUSTOM_SKILL_BASE_VALUE = 'CSF' << 8;
 
+	// Skill data struct for the interface
+	struct SkillProgressData
+	{
+		float level = 0.0f;
+		float xp = 0.0f;
+		float levelThreshold = 0.0f;
+		float legendary = 0.0f;
+	};
+
 	class Skill final
 	{
 	public:
@@ -30,7 +39,7 @@ namespace CustomSkills
 
 		bool UpdateColor();
 
-		std::array<float, 4> QuerySkillProgress();
+		SkillProgressData QuerySkillProgress() const;
 
 		std::string ID;
 		std::string Description;

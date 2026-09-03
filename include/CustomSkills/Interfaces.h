@@ -25,7 +25,7 @@ namespace CustomSkills
 	public:
 		enum
 		{
-			kVersion = 1,
+			kVersion = 2,
 		};
 
 		/**
@@ -39,14 +39,6 @@ namespace CustomSkills
 		 * @param[in] a_skillId The ID of the skill or group to open the menu for.
 		 */
 		void ShowStatsMenu(const char* a_skillId);
-
-		/**
-		 * Get the xp, level and threshold of a skill.
-		 *
-		 * @param[in] a_skillId The ID of the skill to query.
-		 * @return An array consisting of [0] = level, [1] = xp, [2] = level threshold, [3] = legendary
-		 */
-		std::array<float, 4> QuerySkillProgress(const char* a_skillId);
 
 		/**
 		 * Advance the given skill by the provided amount of skill usage.
@@ -71,6 +63,14 @@ namespace CustomSkills
 		 */
 		template <class T>
 		[[nodiscard]] RE::BSTEventSource<T>* GetEventDispatcher();
+
+		/**
+		* Get the xp, level, threshold and legendary amount of a skill.
+		*
+		* @param[in] a_skillId The ID of the skill to query.
+		* @return A struct consisting of level, xp, level threshold, legendary amount
+		*/
+		SkillProgressData QuerySkillProgress(const char* a_skillId);
 
 	protected:
 		[[nodiscard]] const detail::CustomSkillsInterface* GetProxy() const;
