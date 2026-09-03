@@ -148,6 +148,7 @@ namespace CustomSkills
 	
 	Skill::SkillProgressData& Skill::QuerySkillProgress()
 	{
+		SkillProgress = {};
 		if (!Level || !Ratio || !Info || !Info->skill) {
 			return SkillProgress;
 		}
