@@ -145,19 +145,18 @@ namespace CustomSkills
 		ColorStr = fmt::format("#{:06X}"sv, cv);
 		return true;
 	}
-
-	SkillProgressData Skill::QuerySkillProgress() const
+	
+	Skill::SkillProgressData& Skill::QuerySkillProgress()
 	{
 		if (!Level || !Ratio || !Info || !Info->skill) {
-			return {};
+			return SkillProgress;
 		}
-		SkillProgressData skillProgress = {};
-		skillProgress.level = Level->value;
-		skillProgress.xp = Ratio->value;
-		skillProgress.levelThreshold = CalcLevelThreshold(static_cast<std::int32_t>(Level->value), Info->skill->improveMult, Info->skill->improveOffset);
+		SkillProgress.level = Level->value;
+		SkillProgress.xp = Ratio->value;
+		SkillProgress.levelThreshold = CalcLevelThreshold(static_cast<std::int32_t>(Level->value), Info->skill->improveMult, Info->skill->improveOffset);
 		if (Legendary) {
-			skillProgress.legendary = Legendary->value;
+			SkillProgress.legendary = Legendary->value;
 		}
-		return skillProgress;
+		return SkillProgress;
 	}
 }

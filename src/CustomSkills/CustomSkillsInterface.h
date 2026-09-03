@@ -20,7 +20,7 @@ namespace CustomSkills::Impl
 
 		void* GetEventDispatcher(std::uint32_t a_dispatcherID);
 
-		SkillProgressData QuerySkillProgress(const char* a_skillId);
+		detail::SkillProgressData* QuerySkillProgress(const char* a_skillId);
 
 		const char* GetCustomSkills();
 	}

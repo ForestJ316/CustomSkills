@@ -49,7 +49,7 @@ namespace CustomSkills
 			GetProxy()->GetEventDispatcher(static_cast<std::uint32_t>(T::ID)));
 	}
 
-	inline SkillProgressData CustomSkillsInterface::QuerySkillProgress(const char* a_skillId)
+	inline detail::SkillProgressData* CustomSkillsInterface::QuerySkillProgress(const char* a_skillId)
 	{
 		return GetProxy()->QuerySkillProgress(a_skillId);
 	}

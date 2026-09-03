@@ -21,10 +21,10 @@ namespace CustomSkills
 		kSkillIncreaseEvent,
 	};
 
-	struct SkillProgressData;
-
 	namespace detail
 	{
+		struct SkillProgressData;
+
 		struct CustomSkillsInterface
 		{
 			std::uint32_t interfaceVersion;
@@ -32,7 +32,7 @@ namespace CustomSkills
 			void (*AdvanceSkill)(const char* a_skillId, float a_magnitude);
 			void (*IncrementSkill)(const char* a_skillId, std::uint32_t a_count);
 			void* (*GetEventDispatcher)(std::uint32_t a_dispatcherID);
-			SkillProgressData (*QuerySkillProgress)(const char* a_skillId);
+			SkillProgressData* (*QuerySkillProgress)(const char* a_skillId);
 			const char* (*GetCustomSkills)();
 		};
 		static_assert(sizeof(CustomSkillsInterface) == 0x38);
