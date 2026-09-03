@@ -19,7 +19,8 @@ namespace CustomSkills
 	static void IncreasePlayerCharacterXP(std::int32_t a_rankGained)
 	{
 		const auto player = RE::PlayerCharacter::GetSingleton();
-		player->skills->data->xp += a_rankGained * "fXPPerSkillRank"_gs.value_or(1.0f);
+		player->PlayerCharacterData()->skills->data->xp += a_rankGained *
+			"fXPPerSkillRank"_gs.value_or(1.0f);
 	}
 
 	void Skill::Advance(
@@ -40,14 +41,15 @@ namespace CustomSkills
 
 		float xp = a_isSkillUse ? std::fma(a_magnitude, useMult, useOffset) : a_magnitude;
 		const auto player = RE::PlayerCharacter::GetSingleton();
-		player->advanceSkill = RE::ActorValue::kNone;
-		player->advanceObject = a_advanceObject;
-		player->advanceAction = 0;
+		const auto playerData = player->PlayerCharacterData();
+		playerData->advanceSkill = RE::ActorValue::kNone;
+		playerData->advanceObject = a_advanceObject;
+		playerData->advanceAction = 0;
 		RE::BGSEntryPoint::HandleEntryPoint(
 			RE::BGSEntryPoint::ENTRY_POINT::kModSkillUse,
 			player,
 			&xp);
-		player->advanceObject = nullptr;
+		playerData->advanceObject = nullptr;
 
 		std::int32_t level = static_cast<std::int32_t>(Level->value);
 		float ratio = Ratio->value;

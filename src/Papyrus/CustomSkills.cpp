@@ -11,7 +11,7 @@ namespace Papyrus::CustomSkills
 {
 	std::int32_t GetAPIVersion(RE::StaticFunctionTag*)
 	{
-		return 3;
+		return 4;
 	}
 
 	void OpenCustomSkillMenu(RE::StaticFunctionTag*, std::string asSkillId)

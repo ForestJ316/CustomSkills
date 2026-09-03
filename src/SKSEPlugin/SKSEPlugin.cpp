@@ -16,6 +16,7 @@
 #include "CustomSkills/Serialization.h"
 #include "Papyrus/CustomSkills.h"
 #include "Papyrus/Events.h"
+#include "SkillDecay_API.h"
 
 namespace
 {
@@ -120,6 +121,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 				break;
 			}
 		});
+	SkillDecay::RegisterListener();
 
 	return true;
 }

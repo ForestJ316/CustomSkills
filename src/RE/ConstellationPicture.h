@@ -1,10 +1,11 @@
 #pragma once
 
-namespace CustomSkills
+namespace RE
 {
-	struct CImageController
+	class ConstellationPicture
 	{
-		enum class State
+	public:
+		enum class CONSTELLATION_FADE_STATE
 		{
 			Resting = 0,
 			Entering = 1,
@@ -19,7 +20,7 @@ namespace CustomSkills
 
 		bool IsActive()
 		{
-			return state != State::Resting || shader && shader->GetAlpha() > 0.0f;
+			return state != CONSTELLATION_FADE_STATE::Resting || shader && shader->GetAlpha() > 0.0f;
 		}
 
 		void SetShader(RE::BSShaderProperty* a_shader)
@@ -32,41 +33,41 @@ namespace CustomSkills
 		void Enter()
 		{
 			stateChangeTime = CurrentTime();
-			state = State::Entering;
+			state = CONSTELLATION_FADE_STATE::Entering;
 		}
 
 		void Exit()
 		{
 			if (IsActive()) {
 				stateChangeTime = CurrentTime();
-				state = State::Exiting;
+				state = CONSTELLATION_FADE_STATE::Exiting;
 			}
 		}
 
 		void Update()
 		{
-			if (!shader || state == State::Resting)
+			if (!shader || state == CONSTELLATION_FADE_STATE::Resting)
 				return;
 
 			if (CurrentTime() - stateChangeTime <= 500) {
 				float alpha = (CurrentTime() - stateChangeTime) / 500.0f;
-				if (state != State::Entering) {
+				if (state != CONSTELLATION_FADE_STATE::Entering) {
 					alpha = 1.0f - alpha;
 				}
 
 				shader->SetAlpha(alpha);
 			}
 			else {
-				float alpha = state == State::Entering ? 1.0f : 0.0f;
+				float alpha = state == CONSTELLATION_FADE_STATE::Entering ? 1.0f : 0.0f;
 				shader->SetAlpha(alpha);
 
-				state = State::Resting;
+				state = CONSTELLATION_FADE_STATE::Resting;
 			}
 		}
 
 		RE::BSShaderProperty* shader = nullptr;
-		SKSE::stl::enumeration<State, std::uint32_t> state = State::Resting;
+		SKSE::stl::enumeration<CONSTELLATION_FADE_STATE, std::uint32_t> state = CONSTELLATION_FADE_STATE::Resting;
 		std::uint32_t stateChangeTime;
 	};
-	static_assert(sizeof(CImageController) == 0x10);
+	static_assert(sizeof(ConstellationPicture) == 0x10);
 }

@@ -8,6 +8,9 @@ namespace CustomSkills
 		static void WriteHooks();
 
 	private:
+		// Control whether legendary is available for the current skill
+		static void LegendaryAvailablePatch();
+
 		// Skip setting data in player skills struct
 		static void PlayerSkillsPatch();
 

@@ -5,6 +5,8 @@
 
 #include <xbyak/xbyak.h>
 
+#pragma section(".jit", execute)
+
 namespace CustomSkills
 {
 	void Training::WriteHooks()
@@ -17,10 +19,10 @@ namespace CustomSkills
 
 	void Training::MenuSkillPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::TrainingMenu::SetTrainer, 0x63);
+		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::TrainingMenu::SetupMenu, 0x63);
 		REL::make_pattern<"E8">().match_or_fail(hook.address());
 
-		using GetTeachesSkill_t = RE::ActorValue(RE::TESClass::*)() const;
+		using GetTeachesSkill_t = RE::ActorValue (RE::TESClass::*)() const;
 		static REL::Relocation<GetTeachesSkill_t> _GetTeachesSkill;
 
 		auto GetTeachesSkill = +[](const RE::TESClass* a_class) -> RE::ActorValue
@@ -51,9 +53,13 @@ namespace CustomSkills
 			return nullptr;
 		};
 
+		__declspec(allocate(".jit")) alignas(
+			16) static constinit auto buffer = util::jit_buffer<32>();
+
 		struct Patch : Xbyak::CodeGenerator
 		{
 			Patch(std::uintptr_t a_funcAddr, std::uintptr_t a_retnAddr)
+				: Xbyak::CodeGenerator(buffer.size(), buffer.data())
 			{
 				Xbyak::Label funcLbl;
 				Xbyak::Label retnLbl;
@@ -70,19 +76,22 @@ namespace CustomSkills
 			}
 		};
 
-		auto patch = new Patch(
-			reinterpret_cast<std::uintptr_t>(GetSkillName),
-			hook.address() + 0x6);
-		patch->ready();
+		if (auto ctx = REL::safe_write_context(buffer.data(), buffer.size())) {
+			auto patch = Patch(
+				reinterpret_cast<std::uintptr_t>(GetSkillName),
+				hook.address() + 0x6);
+			patch.ready();
+			assert(((patch.getSize() + 0xF) & ~0xF) == buffer.size());
+		}
 
 		// TRAMPOLINE: 8
 		auto& trampoline = SKSE::GetTrampoline();
-		trampoline.write_branch<6>(hook.address(), patch->getCode());
+		trampoline.write_branch<6>(hook.address(), buffer.data());
 	}
 
 	void Training::MaxLevelPatch()
 	{
-		auto GetMaximumTrainingLevel = +[](const RE::TESClass* a_class) -> std::uint32_t
+		auto GetTrainingSkillLevel = +[](const RE::TESClass* a_class) -> std::uint32_t
 		{
 			if (CustomSkillsManager::IsOurTrainingMode()) {
 				return CustomSkillsManager::_trainingMax;
@@ -90,9 +99,9 @@ namespace CustomSkills
 			return a_class->data.maximumTrainingLevel;
 		};
 
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::TESClass::GetMaximumTrainingLevel);
+		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::TESClass::GetTrainingSkillLevel);
 		REL::safe_fill(hook.address(), 0x10, REL::INT3);
-		util::write_14branch(hook.address(), GetMaximumTrainingLevel);
+		util::write_14branch(hook.address(), GetTrainingSkillLevel);
 	}
 
 	void Training::IncrementSkillPatch()

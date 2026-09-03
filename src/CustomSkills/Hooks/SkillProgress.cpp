@@ -6,6 +6,8 @@
 
 #include <xbyak/xbyak.h>
 
+#pragma section(".jit", execute)
+
 namespace CustomSkills
 {
 	void SkillProgress::WriteHooks()
@@ -17,7 +19,7 @@ namespace CustomSkills
 		RequirementsTextPatch();
 	}
 
-	void SkillProgress::GetSkillProgress(
+	void SkillProgress::GetSkillInfo(
 		RE::PlayerCharacter::PlayerSkills* a_playerSkills,
 		RE::ActorValue a_skill,
 		float* a_level,
@@ -88,15 +90,18 @@ namespace CustomSkills
 
 	void SkillProgress::SkillProgressPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::PlayerSkills::GetSkillProgress);
+		auto hook = REL::Relocation<std::uintptr_t>(
+			RE::Offset::CharacterProgression::GetSkillInfo);
 
 		REL::safe_fill(hook.address(), REL::INT3, 0x50);
-		util::write_14branch(hook.address(), &SkillProgress::GetSkillProgress);
+		util::write_14branch(hook.address(), &SkillProgress::GetSkillInfo);
 	}
 
 	void SkillProgress::HideLevelPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::StatsMenu::SetSkillInfo, 0x108F);
+		auto hook = REL::Relocation<std::uintptr_t>(
+			RE::Offset::StatsMenu::UpdateDescriptionCard,
+			0x108F);
 
 		REL::make_pattern<"80 3D ?? ?? ?? ?? 00">().match_or_fail(hook.address());
 
@@ -113,9 +118,13 @@ namespace CustomSkills
 			return CustomSkillsManager::IsBeastMode();
 		};
 
+		__declspec(allocate(".jit")) alignas(
+			16) static constinit auto buffer = util::jit_buffer<48>();
+
 		struct Patch : Xbyak::CodeGenerator
 		{
 			Patch(std::uintptr_t a_funcAddr, std::uintptr_t a_retnAddr)
+				: Xbyak::CodeGenerator(buffer.size(), buffer.data())
 			{
 				Xbyak::Label funcLbl;
 				Xbyak::Label retnLbl;
@@ -134,23 +143,26 @@ namespace CustomSkills
 			}
 		};
 
-		auto patch = new Patch(
-			reinterpret_cast<std::uintptr_t>(UseBeastSkillInfo),
-			hook.address() + 0x7);
-		patch->ready();
+		if (auto ctx = REL::safe_write_context(buffer.data(), buffer.size())) {
+			auto patch = Patch(
+				reinterpret_cast<std::uintptr_t>(UseBeastSkillInfo),
+				hook.address() + 0x7);
+			patch.ready();
+			assert(((patch.getSize() + 0xF) & ~0xF) == buffer.size());
+		}
 
 		// TRAMPOLINE: 8
 		auto& trampoline = SKSE::GetTrampoline();
 		REL::safe_fill(hook.address(), REL::NOP, 0x7);
-		trampoline.write_branch<6>(hook.address(), patch->getCode());
+		trampoline.write_branch<6>(hook.address(), buffer.data());
 	}
 
 	void SkillProgress::RequirementsTextPatch()
 	{
-		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::BGSPerk::GetRequirementsText);
+		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::BGSPerk::BuildDescriptionString);
 
 		REL::safe_fill(hook.address(), REL::INT3, 0x100);
-		util::write_14branch(hook.address(), &GetRequirementsText);
+		util::write_14branch(hook.address(), &BuildDescriptionString);
 	}
 
 	void SkillProgress::ModifyPerkCount(RE::StatsMenu* a_statsMenu, std::int32_t a_countDelta)
@@ -158,10 +170,12 @@ namespace CustomSkills
 		if (CustomSkillsManager::IsOurMenuMode()) {
 			if (a_countDelta > 0) {
 				if (const auto player = RE::PlayerCharacter::GetSingleton()) {
-					std::int32_t oldCount = player->perkCount;
+					const auto playerData = player->PlayerCharacterData();
+					std::int32_t oldCount = playerData->perkCount;
 					std::int32_t newCount = oldCount + a_countDelta;
 					if (newCount > oldCount && oldCount != 255) {
-						player->perkCount = static_cast<std::uint8_t>((std::min)(255, newCount));
+						playerData->perkCount = static_cast<std::uint8_t>(
+							(std::min)(255, newCount));
 					}
 				}
 			}
@@ -183,7 +197,7 @@ namespace CustomSkills
 		}
 	}
 
-	void SkillProgress::GetRequirementsText(
+	void SkillProgress::BuildDescriptionString(
 		RE::BGSPerk* a_perk,
 		char* a_buf,
 		std::int32_t a_bufLen,
