@@ -72,6 +72,11 @@ namespace CustomSkills
 		*/
 		SkillProgressData QuerySkillProgress(const char* a_skillId);
 
+		/**
+		* Get a string of all custom skills, separated by a comma.
+		*/
+		const char* GetCustomSkills();
+
 	protected:
 		[[nodiscard]] const detail::CustomSkillsInterface* GetProxy() const;
 	};

@@ -23,6 +23,7 @@ namespace CustomSkills::Impl
 			.IncrementSkill = &IncrementSkill,
 			.GetEventDispatcher = &GetEventDispatcher,
 			.QuerySkillProgress = &QuerySkillProgress,
+			.GetCustomSkills = &GetCustomSkills,
 		};
 		return std::addressof(intfc);
 	}
@@ -68,5 +69,10 @@ namespace CustomSkills::Impl
 			return skill->QuerySkillProgress();
 		}
 		return {};
+	}
+
+	const char* CustomSkillsInterface::GetCustomSkills()
+	{
+		return CustomSkillsManager::GetCustomSkills();
 	}
 }

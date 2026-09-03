@@ -285,6 +285,30 @@ namespace CustomSkills
 		return nullptr;
 	}
 
+	const char* CustomSkillsManager::GetCustomSkills()
+	{
+		std::vector<std::string> skillsList = {};
+		for (const auto& [key, group] : CustomSkillsManager::_groupIds) {
+			for (std::size_t i = 0; i < group->Skills.size(); ++i) {
+				const auto& skill = group->Skills[i];
+				if (!skill) {
+					continue;
+				}
+				// Ignore vanilla skills
+				if (util::ParseSkill(skill->GetName()) != std::nullopt) {
+					continue;
+				}
+				skillsList.emplace_back(skill->GetName());
+			}
+		}
+		std::string result = "";
+		result = std::accumulate(skillsList.begin(), skillsList.end(), std::string(),
+			[](const auto& a_str1, const auto& a_str2) {
+			return a_str1.empty() ? a_str2 : a_str1 + ", " + a_str2;
+		});
+		return result.c_str();
+	}
+
 	void CustomSkillsManager::UpdateSkills()
 	{
 		if (RE::Main::GetSingleton()->freezeTime || RE::UI::GetSingleton()->GameIsPaused()) {

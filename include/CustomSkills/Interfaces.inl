@@ -54,6 +54,11 @@ namespace CustomSkills
 		return GetProxy()->QuerySkillProgress(a_skillId);
 	}
 
+	inline const char* CustomSkillsInterface::GetCustomSkills()
+	{
+		return GetProxy()->GetCustomSkills();
+	}
+
 	inline void QueryCustomSkillsInterface(
 		const SKSE::MessagingInterface::Message* a_msg,
 		CustomSkillsInterface*& a_intfc)

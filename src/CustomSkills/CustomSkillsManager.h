@@ -70,6 +70,8 @@ namespace CustomSkills
 
 		static std::shared_ptr<Skill> GetCurrentSkill(RE::ActorValue a_value);
 
+		static const char* GetCustomSkills();
+
 		static void UpdateSkills();
 
 		static void UpdateMenu();
