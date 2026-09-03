@@ -63,10 +63,10 @@ namespace CustomSkills::Impl
 		return nullptr;
 	}
 
-	detail::SkillProgressData* CustomSkillsInterface::QuerySkillProgress(const char* a_skillId)
+	void* CustomSkillsInterface::QuerySkillProgress(const char* a_skillId)
 	{
 		if (const auto skill = CustomSkillsManager::FindSkill(a_skillId)) {
-			return reinterpret_cast<detail::SkillProgressData*>(&skill->QuerySkillProgress());
+			return &skill->QuerySkillProgress();
 		}
 		return nullptr;
 	}
