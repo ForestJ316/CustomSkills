@@ -70,7 +70,14 @@ namespace CustomSkills
 		* @param[in] a_skillId The ID of the skill to query.
 		* @return A struct consisting of level, xp, level threshold, legendary amount
 		*/
-		void* QuerySkillProgress(const char* a_skillId);
+		struct SkillProgressData
+		{
+			float level;
+			float xp;
+			float levelThreshold;
+			float legendary;
+		};
+		SkillProgressData* QuerySkillProgress(const char* a_skillId);
 
 		/**
 		* Get a string of all custom skills, separated by a comma.
